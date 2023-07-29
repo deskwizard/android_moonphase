@@ -20,12 +20,6 @@
 
 package com.deskwizard.moonphase
 
-import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.content.SharedPreferences
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -37,16 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
-import androidx.work.Worker
-import androidx.work.WorkerParameters
-import androidx.work.impl.utils.PREFERENCE_FILE_KEY
 import com.deskwizard.moonphase.ui.theme.MoonPhaseTheme
-import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 var moonPhaseImages = arrayOf(
@@ -82,43 +67,24 @@ var moonPhaseImages = arrayOf(
     R.drawable.moon_phase_29,
 )
 
-lateinit var sharedPref : SharedPreferences // Needs to be late init
-lateinit var appContext : Context // Needs to be late init
-
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        appContext = this
-
         /******************************** Notifications ********************************/
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Required for API 26 and up (8.0)
-                val channel =
-                    NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT)
-                val notificationManager = getSystemService(NotificationManager::class.java)
-                notificationManager.createNotificationChannel(channel)
-        }
-
-        val notificationWorkRequest: WorkRequest = OneTimeWorkRequest.Builder(NotificationWorker::class.java)
-            .setInitialDelay(1, TimeUnit.MINUTES)
-            .build()
-
-        // Schedule the WorkRequest with WorkManager
-        WorkManager.getInstance(this).enqueue(notificationWorkRequest)
-
+        NotificationHelper.startNotificationHelper(this)
 
         /******************************** Data fetcher task ********************************/
 
-        NetworkAPI.startDataFetcher()
+        NetworkAPI.startDataFetcher(this)
 
-        /********************************  Preferences ********************************/
+        /******************************** Preferences ********************************/
 
-        sharedPref  = applicationContext.getSharedPreferences(PREFERENCE_FILE_KEY, MODE_PRIVATE)
-        MoonPreferenceProvider (sharedPref).loadAll()  // Load saved data
+        MoonPreferenceProvider(this).loadAll()  // Load saved data
 
+        /******************************** The rest ********************************/
         setContent {
             MoonPhaseTheme {
                 // A surface container using the 'background' color from the theme
@@ -146,7 +112,7 @@ fun DataDisplay() {
     Image(
         painter = painterResource(id = moonPhaseImages[MoonData.ImageIndex]),
         contentDescription = "Moon Phase Image"
-    )
+        )
 
     Text(
         // Keep for debug
@@ -154,23 +120,4 @@ fun DataDisplay() {
         //text = "Unix Time: $unixTime \n Date: ${date.toLocalDate()} \n Time: ${date.toLocalTime()} \n Moon: $moon \n Image Index: $index \n Age: $age days \n Phase: $phase \n Illumination: $illumination%",
         text = " $moon \n $phase ($age days old) \n $illumination% Illumination \n\n",
         )
-}
-
-
-
-class NotificationWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
-
-    @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
-    override fun doWork(): Result {
-        val notification = NotificationCompat.Builder(applicationContext, "default")
-            .setSmallIcon(R.drawable.ic_stat_name)
-            .setContentTitle("Task completed")
-            .setContentText("The background task has completed successfully.")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
-
-        // Perform the background task here
-        NotificationManagerCompat.from(applicationContext).notify(1, notification)
-        return Result.success()
-    }
 }

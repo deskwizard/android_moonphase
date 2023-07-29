@@ -22,13 +22,13 @@ object MoonData {
     var LastUpdateTime: Long = 0
 }
 
-class DataFetcherWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+class DataFetcherWorker(private val context: Context, params: WorkerParameters) : Worker(context, params) {
 
     @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
     override fun doWork(): Result {
 
         // Perform the background task here
-        NetworkAPI.moonDataFetcher()
+        NetworkAPI.moonDataFetcher(context)
         return Result.success()
     }
 }
@@ -40,15 +40,15 @@ object NetworkAPI {
     @Serializable
     class MoonJSON(val Moon: String, val Index: Int, val Age: Float, val Phase: String, val Illumination: Float)
 
-    fun startDataFetcher() {
+    fun startDataFetcher(context: Context) {
         val dataFetcherWorkRequest: PeriodicWorkRequest = PeriodicWorkRequest.Builder(DataFetcherWorker::class.java,15L, TimeUnit.MINUTES)
             .setInitialDelay(1, TimeUnit.MINUTES)
             .build()
 
-        WorkManager.getInstance(appContext).enqueueUniquePeriodicWork("dataFetcherWorker", ExistingPeriodicWorkPolicy.KEEP, dataFetcherWorkRequest)
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork("dataFetcherWorker", ExistingPeriodicWorkPolicy.KEEP, dataFetcherWorkRequest)
     }
 
-    fun moonDataFetcher() {
+    fun moonDataFetcher(context: Context) {
         val unixTime = System.currentTimeMillis() / 1000
 
         var returnedMoonJSON: String
@@ -65,6 +65,9 @@ object NetworkAPI {
             .url(url)
             .get()
             .build()
+
+        println("debug")
+        // -----------------------------
 
         try {
             val responseBody = client.newCall(request).execute().body
@@ -87,6 +90,9 @@ object NetworkAPI {
         MoonData.ImageIndex = fetchedMoonJSON.Index
         MoonData.LastUpdateTime = unixTime
 
-        MoonPreferenceProvider (sharedPref).saveAll()
+        //MoonPreferenceProvider (sharedPref).saveAll()
+        //MoonPreferenceProvider (appContext).saveAll()
+        MoonPreferenceProvider (context).saveAll()
+
     }
 }

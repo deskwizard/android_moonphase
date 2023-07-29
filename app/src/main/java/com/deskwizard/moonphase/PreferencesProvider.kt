@@ -1,10 +1,16 @@
 package com.deskwizard.moonphase
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import androidx.work.impl.utils.PREFERENCE_FILE_KEY
 
 @SuppressLint("ApplySharedPref")
-class MoonPreferenceProvider (private val sharedPref : SharedPreferences) {
+class MoonPreferenceProvider (context: Context) {
+
+    val sharedPref: SharedPreferences = context.getSharedPreferences(PREFERENCE_FILE_KEY, MODE_PRIVATE)
+
 
     private fun save (key: String, value: String) {
         with (sharedPref.edit()) {
