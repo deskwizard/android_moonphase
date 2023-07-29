@@ -13,15 +13,7 @@ import okhttp3.OkHttpClient
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-object MoonData {
-    var Name: String = ""
-    var Phase: String = ""
-    var Age: Float = 0.0F
-    var Illumination: Float = 0.0F
-    var ImageIndex = 0
-    var LastUpdateTime: Long = 0
-}
-
+// TODO: Make the returned value actually do something useful...
 class DataFetcherWorker(private val context: Context, params: WorkerParameters) : Worker(context, params) {
 
     @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
@@ -42,13 +34,14 @@ object NetworkAPI {
 
     fun startDataFetcher(context: Context) {
         val dataFetcherWorkRequest: PeriodicWorkRequest = PeriodicWorkRequest.Builder(DataFetcherWorker::class.java,15L, TimeUnit.MINUTES)
-            .setInitialDelay(1, TimeUnit.MINUTES)
+            .setInitialDelay(0, TimeUnit.MINUTES)
             .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork("dataFetcherWorker", ExistingPeriodicWorkPolicy.KEEP, dataFetcherWorkRequest)
     }
 
     fun moonDataFetcher(context: Context) {
+
         val unixTime = System.currentTimeMillis() / 1000
 
         var returnedMoonJSON: String
@@ -65,9 +58,6 @@ object NetworkAPI {
             .url(url)
             .get()
             .build()
-
-        println("debug")
-        // -----------------------------
 
         try {
             val responseBody = client.newCall(request).execute().body
@@ -90,9 +80,6 @@ object NetworkAPI {
         MoonData.ImageIndex = fetchedMoonJSON.Index
         MoonData.LastUpdateTime = unixTime
 
-        //MoonPreferenceProvider (sharedPref).saveAll()
-        //MoonPreferenceProvider (appContext).saveAll()
         MoonPreferenceProvider (context).saveAll()
-
     }
 }
