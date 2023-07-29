@@ -51,7 +51,7 @@ import com.deskwizard.moonphase.ui.theme.MoonPhaseTheme
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
-var imgArray = arrayOf(
+var moonPhaseImages = arrayOf(
     R.drawable.moon_phase_0,
     R.drawable.moon_phase_1,
     R.drawable.moon_phase_2,
@@ -84,15 +84,18 @@ var imgArray = arrayOf(
     R.drawable.moon_phase_29,
 )
 lateinit var sharedPref : SharedPreferences // Needs to be late init
+lateinit var appContext : Context // Needs to be late init
+
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        appContext = this
 
         /******************************** Notifications ********************************/
-
+/*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Required for API 26 and up (8.0)
                 val channel =
                     NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT)
@@ -106,15 +109,11 @@ class MainActivity : ComponentActivity() {
 
         // Schedule the WorkRequest with WorkManager
         WorkManager.getInstance(this).enqueue(notificationWorkRequest)
-
+*/
 
         /******************************** Data fetcher task ********************************/
 
-        val dataFetcherWorkRequest: PeriodicWorkRequest = PeriodicWorkRequest.Builder(DataFetcherWorker::class.java,15L, TimeUnit.MINUTES)
-            .setInitialDelay(1, TimeUnit.MINUTES)
-            .build()
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork("dataFetcherWorker", ExistingPeriodicWorkPolicy.KEEP, dataFetcherWorkRequest)
-
+        NetworkAPI.startDataFetcher()
 
         /********************************  Preferences ********************************/
 
@@ -146,7 +145,7 @@ fun DataDisplay() {
     val illumination = (MoonData.Illumination * 100.0).roundToInt()
 
     Image(
-        painter = painterResource(id = imgArray[MoonData.ImageIndex]),
+        painter = painterResource(id = moonPhaseImages[MoonData.ImageIndex]),
         contentDescription = "Moon Phase Image"
     )
 

@@ -2,6 +2,9 @@ package com.deskwizard.moonphase
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import kotlinx.serialization.Serializable
@@ -33,10 +36,17 @@ class DataFetcherWorker(context: Context, params: WorkerParameters) : Worker(con
 object NetworkAPI {
 
     private val format = Json { ignoreUnknownKeys = true; isLenient = true }
-//    var returnedMoonJSON = ""
 
     @Serializable
     class MoonJSON(val Moon: String, val Index: Int, val Age: Float, val Phase: String, val Illumination: Float)
+
+    fun startDataFetcher() {
+        val dataFetcherWorkRequest: PeriodicWorkRequest = PeriodicWorkRequest.Builder(DataFetcherWorker::class.java,15L, TimeUnit.MINUTES)
+            .setInitialDelay(1, TimeUnit.MINUTES)
+            .build()
+
+        WorkManager.getInstance(appContext).enqueueUniquePeriodicWork("dataFetcherWorker", ExistingPeriodicWorkPolicy.KEEP, dataFetcherWorkRequest)
+    }
 
     fun moonDataFetcher() {
         val unixTime = System.currentTimeMillis() / 1000
