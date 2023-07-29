@@ -1,8 +1,5 @@
-package com.deskwizard.moonphase.network
+package com.deskwizard.moonphase
 
-import com.deskwizard.moonphase.MoonData
-import com.deskwizard.moonphase.MoonPreferenceProvider
-import com.deskwizard.moonphase.sharedPref
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -13,11 +10,19 @@ import okhttp3.OkHttpClient
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
+object MoonData {
+    var Name: String = ""
+    var Phase: String = ""
+    var Age: Float = 0.0F
+    var Illumination: Float = 0.0F
+    var ImageIndex = 0
+    var LastUpdateTime: Long = 0
+}
 
-object MoonApi {
+object NetworkAPI {
 
     private val format = Json { ignoreUnknownKeys = true; isLenient = true }
-    var returnedMoonJSON = ""
+//    var returnedMoonJSON = ""
 
     @Serializable
     class MoonJSON(val Moon: String, val Index: Int, val Age: Float, val Phase: String, val Illumination: Float)
@@ -25,13 +30,14 @@ object MoonApi {
     @OptIn(DelicateCoroutinesApi::class) // turn off delicate warning for GlobalScope
     fun startDataFetcher() {
         GlobalScope.launch(Dispatchers.IO) {
-            dataFetcher()
+            moonDataFetcher()
         }
     }
 
-    private fun dataFetcher() {
+    private fun moonDataFetcher() {
         val unixTime = System.currentTimeMillis() / 1000
 
+        var returnedMoonJSON: String
         val url = URL("http://api.farmsense.net:80/v1/moonphases/?d=$unixTime")
 
         val builder = OkHttpClient.Builder()
@@ -46,17 +52,16 @@ object MoonApi {
             .get()
             .build()
 
-        // TODO: Exception on error?
         try {
             val responseBody = client.newCall(request).execute().body
             returnedMoonJSON = responseBody?.string().toString()
         } catch (e: Exception) {
-            println("--------- it's dead Jim... --------")
+            println("--------- Network Exception --------")
             e.printStackTrace()
             return
         }
 
-
+        // If we get here, we have valid JSON
         val filteredCharacters = "[]"
         returnedMoonJSON = returnedMoonJSON.filterNot { filteredCharacters.indexOf(it) > -1 }
         val fetchedMoonJSON = format.decodeFromString<MoonJSON>(returnedMoonJSON)

@@ -39,74 +39,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.impl.utils.PREFERENCE_FILE_KEY
-import com.deskwizard.moonphase.network.MoonApi
 import com.deskwizard.moonphase.ui.theme.MoonPhaseTheme
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
-
-class NotificationWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
-
-    @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
-    override fun doWork(): Result {
-        val notification = NotificationCompat.Builder(applicationContext, "default")
-            .setSmallIcon(R.drawable.ic_stat_name)
-            .setContentTitle("Task completed")
-            .setContentText("The background task has completed successfully.")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .build()
-
-        // Perform the background task here
-        NotificationManagerCompat.from(applicationContext).notify(1, notification)
-        return Result.success()
-    }
-}
-
-// Needs to be late init
-lateinit var sharedPref : SharedPreferences
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        /********* Notifications **********/
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Required for API 26 and up (8.0)
-                val channel =
-                    NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT)
-                val notificationManager = getSystemService(NotificationManager::class.java)
-                notificationManager.createNotificationChannel(channel)
-        }
-
-        val notificationWorkRequest: WorkRequest = OneTimeWorkRequest.Builder(NotificationWorker::class.java)
-            .setInitialDelay(1, TimeUnit.MINUTES)
-            .build()
-
-        // Schedule the WorkRequest with WorkManager
-        WorkManager.getInstance(this).enqueue(notificationWorkRequest)
-
-        /*********** Preferences **********/
-        sharedPref  = applicationContext.getSharedPreferences(PREFERENCE_FILE_KEY, MODE_PRIVATE)
-        MoonPreferenceProvider (sharedPref).loadAll()
-
-        setContent {
-            MoonPhaseTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MoonApi.startDataFetcher()
-                    DataDisplay()
-
-                }
-            }
-        }
-    }
-}
 
 var imgArray = arrayOf(
     R.drawable.moon_phase_0,
@@ -140,6 +79,92 @@ var imgArray = arrayOf(
     R.drawable.moon_phase_28,
     R.drawable.moon_phase_29,
 )
+lateinit var sharedPref : SharedPreferences // Needs to be late init
+
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        /********* Notifications **********/
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Required for API 26 and up (8.0)
+                val channel =
+                    NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT)
+                val notificationManager = getSystemService(NotificationManager::class.java)
+                notificationManager.createNotificationChannel(channel)
+        }
+
+        val notificationWorkRequest: WorkRequest = OneTimeWorkRequest.Builder(NotificationWorker::class.java)
+            .setInitialDelay(1, TimeUnit.MINUTES)
+            .build()
+
+        // Schedule the WorkRequest with WorkManager
+        // WorkManager.getInstance(this).enqueue(notificationWorkRequest)
+
+
+        /*********** Preferences **********/
+        sharedPref  = applicationContext.getSharedPreferences(PREFERENCE_FILE_KEY, MODE_PRIVATE)
+        MoonPreferenceProvider (sharedPref).loadAll()  // Load saved data
+
+        setContent {
+            MoonPhaseTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    NetworkAPI.startDataFetcher()
+                    DataDisplay()
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun DataDisplay() {
+    //val unixTime = System.currentTimeMillis() / 1000
+
+    val phase = MoonData.Phase
+    val moon = MoonData.Name
+    val age = MoonData.Age.roundToInt()
+    val illumination = (MoonData.Illumination * 100.0).roundToInt()
+
+    Image(
+        painter = painterResource(id = imgArray[MoonData.ImageIndex]),
+        contentDescription = "Moon Phase Image"
+    )
+
+    Text(
+        // Keep for debug
+        //val date = LocalDateTime.ofInstant(Instant.ofEpochSecond(unixTime), ZoneId.systemDefault())
+        //text = "Unix Time: $unixTime \n Date: ${date.toLocalDate()} \n Time: ${date.toLocalTime()} \n Moon: $moon \n Image Index: $index \n Age: $age days \n Phase: $phase \n Illumination: $illumination%",
+        text = " $moon \n $phase ($age days old) \n $illumination% Illumination \n\n",
+        )
+}
+
+
+
+class NotificationWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+
+    @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
+    override fun doWork(): Result {
+        val notification = NotificationCompat.Builder(applicationContext, "default")
+            .setSmallIcon(R.drawable.ic_stat_name)
+            .setContentTitle("Task completed")
+            .setContentText("The background task has completed successfully.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        // Perform the background task here
+        NotificationManagerCompat.from(applicationContext).notify(1, notification)
+        return Result.success()
+    }
+}
+
+
 
 @SuppressLint("ApplySharedPref")
 class MoonPreferenceProvider (private val sharedPref : SharedPreferences) {
@@ -213,37 +238,4 @@ class MoonPreferenceProvider (private val sharedPref : SharedPreferences) {
         MoonData.ImageIndex = loadInt("ImageIndex")
         MoonData.LastUpdateTime = loadLong("LastUpdateTime")
     }
-}
-
-object MoonData {
-    var Name: String = "No data"
-    var Phase: String = "0"
-    var Age: Float = 1.69F
-    var Illumination: Float = 2.96F
-    var ImageIndex = 0
-    var LastUpdateTime: Long = 0
-}
-
-@Composable
-fun DataDisplay() {
-
-    //val unixTime = System.currentTimeMillis() / 1000
-
-    val phase = MoonData.Phase
-    val moon = MoonData.Name
-    val age = MoonData.Age.roundToInt()
-    val illumination = (MoonData.Illumination * 100.0).roundToInt()
-
-
-    Image(
-        painter = painterResource(id = imgArray[MoonData.ImageIndex]),
-        contentDescription = moon
-    )
-
-    Text(
-        // Keep for debug
-        //val date = LocalDateTime.ofInstant(Instant.ofEpochSecond(unixTime), ZoneId.systemDefault())
-        //text = "Unix Time: $unixTime \n Date: ${date.toLocalDate()} \n Time: ${date.toLocalTime()} \n Moon: $moon \n Image Index: $index \n Age: $age days \n Phase: $phase \n Illumination: $illumination%",
-        text = " $moon \n $phase ($age days old) \n $illumination% Illumination \n\n",
-        )
 }
