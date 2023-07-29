@@ -88,6 +88,5 @@ object NetworkAPI {
         MoonData.LastUpdateTime = unixTime
 
         MoonPreferenceProvider (sharedPref).saveAll()
-
     }
 }

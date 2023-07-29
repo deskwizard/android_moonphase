@@ -39,9 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequest
-import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.Worker
@@ -83,6 +81,7 @@ var moonPhaseImages = arrayOf(
     R.drawable.moon_phase_28,
     R.drawable.moon_phase_29,
 )
+
 lateinit var sharedPref : SharedPreferences // Needs to be late init
 lateinit var appContext : Context // Needs to be late init
 
@@ -95,7 +94,7 @@ class MainActivity : ComponentActivity() {
         appContext = this
 
         /******************************** Notifications ********************************/
-/*
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Required for API 26 and up (8.0)
                 val channel =
                     NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT)
@@ -109,7 +108,7 @@ class MainActivity : ComponentActivity() {
 
         // Schedule the WorkRequest with WorkManager
         WorkManager.getInstance(this).enqueue(notificationWorkRequest)
-*/
+
 
         /******************************** Data fetcher task ********************************/
 
