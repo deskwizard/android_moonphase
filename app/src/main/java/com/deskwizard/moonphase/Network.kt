@@ -34,7 +34,7 @@ object NetworkAPI {
 
     fun startDataFetcher(context: Context) {
         val dataFetcherWorkRequest: PeriodicWorkRequest = PeriodicWorkRequest.Builder(DataFetcherWorker::class.java,15L, TimeUnit.MINUTES)
-            .setInitialDelay(0, TimeUnit.MINUTES)
+            .setInitialDelay(1, TimeUnit.MINUTES)
             .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork("dataFetcherWorker", ExistingPeriodicWorkPolicy.KEEP, dataFetcherWorkRequest)
@@ -46,7 +46,6 @@ object NetworkAPI {
 
         var returnedMoonJSON: String
         val url = URL("http://api.farmsense.net:80/v1/moonphases/?d=$unixTime")
-
         val builder = OkHttpClient.Builder()
         builder.connectTimeout(30, TimeUnit.SECONDS)
         builder.readTimeout(30, TimeUnit.SECONDS)
@@ -81,5 +80,6 @@ object NetworkAPI {
         MoonData.LastUpdateTime = unixTime
 
         MoonPreferenceProvider (context).saveAll()
+
     }
 }

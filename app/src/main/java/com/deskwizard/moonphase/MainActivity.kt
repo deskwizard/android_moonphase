@@ -31,7 +31,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import com.deskwizard.moonphase.ui.theme.MoonPhaseTheme
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 
@@ -45,8 +51,22 @@ class MainActivity : ComponentActivity() {
 
         /******************************** Data fetcher task ********************************/
 
-        NetworkAPI.startDataFetcher(this)
+        //NetworkAPI.startDataFetcher(this)
 
+        val fetchRequest: WorkRequest = OneTimeWorkRequest.Builder(DataFetcherWorker::class.java)
+            .setInitialDelay(30, TimeUnit.SECONDS)
+            .build()
+
+        // Schedule the WorkRequest with WorkManager
+        WorkManager.getInstance(this).enqueue(fetchRequest)
+/*
+        val fetchRequest2 = OneTimeWorkRequest.Builder(DataFetcherWorker::class.java)
+            .setInitialDelay(3, TimeUnit.MINUTES)
+            .build()
+
+        // Schedule the WorkRequest with WorkManager
+        WorkManager.getInstance(this).enqueue(fetchRequest2)
+*/
         /******************************** Preferences ********************************/
 
         MoonPreferenceProvider(this).loadAll()  // Load saved data
