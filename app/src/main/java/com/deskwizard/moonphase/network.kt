@@ -1,9 +1,9 @@
 package com.deskwizard.moonphase
 
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import android.annotation.SuppressLint
+import android.content.Context
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -19,6 +19,17 @@ object MoonData {
     var LastUpdateTime: Long = 0
 }
 
+class DataFetcherWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+
+    @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
+    override fun doWork(): Result {
+
+        // Perform the background task here
+        NetworkAPI.moonDataFetcher()
+        return Result.success()
+    }
+}
+
 object NetworkAPI {
 
     private val format = Json { ignoreUnknownKeys = true; isLenient = true }
@@ -27,14 +38,7 @@ object NetworkAPI {
     @Serializable
     class MoonJSON(val Moon: String, val Index: Int, val Age: Float, val Phase: String, val Illumination: Float)
 
-    @OptIn(DelicateCoroutinesApi::class) // turn off delicate warning for GlobalScope
-    fun startDataFetcher() {
-        GlobalScope.launch(Dispatchers.IO) {
-            moonDataFetcher()
-        }
-    }
-
-    private fun moonDataFetcher() {
+    fun moonDataFetcher() {
         val unixTime = System.currentTimeMillis() / 1000
 
         var returnedMoonJSON: String

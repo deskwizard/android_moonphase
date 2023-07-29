@@ -4,6 +4,7 @@
     Array of drawables: https://stackoverflow.com/a/5760783/7936786
     https://stackoverflow.com/questions/69545093/removing-the-green-background-for-android-icon
     https://stackoverflow.com/questions/40170666/java-net-sockettimeoutexception-in-okhttp
+    https://medium.com/@sumon.v0.0/android-jetpack-workmanager-onetime-and-periodic-work-request-94ace224ff7d
 
     FIXME: Image index is 0-30 but we have 30 images, it's gonna crash out-of-bounds
           eventually... Fix that before it happens
@@ -38,7 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -86,7 +90,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        /********* Notifications **********/
+
+        /******************************** Notifications ********************************/
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Required for API 26 and up (8.0)
                 val channel =
                     NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT)
@@ -99,10 +105,19 @@ class MainActivity : ComponentActivity() {
             .build()
 
         // Schedule the WorkRequest with WorkManager
-        // WorkManager.getInstance(this).enqueue(notificationWorkRequest)
+        WorkManager.getInstance(this).enqueue(notificationWorkRequest)
 
 
-        /*********** Preferences **********/
+        /******************************** Data fetcher task ********************************/
+
+        val dataFetcherWorkRequest: PeriodicWorkRequest = PeriodicWorkRequest.Builder(DataFetcherWorker::class.java,15L, TimeUnit.MINUTES)
+            .setInitialDelay(1, TimeUnit.MINUTES)
+            .build()
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork("dataFetcherWorker", ExistingPeriodicWorkPolicy.KEEP, dataFetcherWorkRequest)
+
+
+        /********************************  Preferences ********************************/
+
         sharedPref  = applicationContext.getSharedPreferences(PREFERENCE_FILE_KEY, MODE_PRIVATE)
         MoonPreferenceProvider (sharedPref).loadAll()  // Load saved data
 
@@ -113,14 +128,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NetworkAPI.startDataFetcher()
                     DataDisplay()
                 }
             }
         }
     }
 }
-
 
 
 @Composable
@@ -161,81 +174,5 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         // Perform the background task here
         NotificationManagerCompat.from(applicationContext).notify(1, notification)
         return Result.success()
-    }
-}
-
-
-
-@SuppressLint("ApplySharedPref")
-class MoonPreferenceProvider (private val sharedPref : SharedPreferences) {
-
-    private fun save (key: String, value: String) {
-        with (sharedPref.edit()) {
-            putString(key, value)
-            commit()
-            println("---------- Saving key $key: $value ----------")
-        }
-    }
-    private fun save (key: String, value: Float) {
-        with (sharedPref.edit()) {
-            putFloat(key, value)
-            commit()
-            println("---------- Saving key $key: $value ----------")
-        }
-    }
-    private fun save (key: String, value: Int) {
-        with (sharedPref.edit()) {
-            putInt(key, value)
-            commit()
-            println("---------- Saving key $key: $value ----------")
-        }
-    }
-    private fun save (key: String, value: Long) {
-        with (sharedPref.edit()) {
-            putLong(key, value)
-            commit()
-            println("---------- Saving key $key: $value ----------")
-        }
-    }
-
-    private fun loadString (key: String): String? {
-        val value = sharedPref.getString(key, "No Data")
-        println("++++++++++ Loading key $key: $value +++++++++++")
-        return value
-    }
-
-    private fun loadFloat (key: String): Float {
-        val value = sharedPref.getFloat(key, 6.85F)
-        println("++++++++++ Loading key $key: $value +++++++++++")
-        return value
-    }
-
-    private fun loadInt (key: String): Int {
-        val value = sharedPref.getInt(key, 7)
-        println("++++++++++ Loading key $key: $value +++++++++++")
-        return value
-    }
-    private fun loadLong (key: String): Long {
-        val value = sharedPref.getLong(key, 7)
-        println("++++++++++ Loading key $key: $value +++++++++++")
-        return value
-    }
-
-    fun saveAll() {
-        save("Name", MoonData.Name)
-        save("Phase", MoonData.Phase)
-        save("Age", MoonData.Age)
-        save("Illumination", MoonData.Illumination)
-        save("ImageIndex", MoonData.ImageIndex)
-        save("LastUpdateTime", MoonData.LastUpdateTime)
-    }
-
-    fun loadAll() {
-        MoonData.Name = loadString("Name").toString()
-        MoonData.Phase = loadString("Phase").toString()
-        MoonData.Age = loadFloat("Age")
-        MoonData.Illumination = loadFloat("Illumination")
-        MoonData.ImageIndex = loadInt("ImageIndex")
-        MoonData.LastUpdateTime = loadLong("LastUpdateTime")
     }
 }
