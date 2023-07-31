@@ -113,6 +113,8 @@ fun DataDisplay() {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize().padding(bottom = 15.dp, start = 16.dp, end = 16.dp )
+
         //modifier = Modifier.border(BorderStroke(5.dp, Color.Red))
     ) {
 
@@ -150,7 +152,7 @@ fun DataDisplay() {
         /*********************** Moon Calendar  ***********************/
         Row(
             modifier = Modifier
-                //.border(BorderStroke(2.dp, Color.Blue))
+                .border(BorderStroke(2.dp, Color.Blue))
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
@@ -202,6 +204,19 @@ fun DataDisplay() {
                 Text("Aug. 25")
             }
         }   // End moon Calendar
+
+        /*********************** Update text and button  ***********************/
+
+        // Last Updated: $days_ago | Update |
+        Row(
+            modifier = Modifier
+                .border(BorderStroke(2.dp, Color.Cyan))
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Text("Last Updated: 4 days ago")
+        }
 
     }    // End main column
 }
