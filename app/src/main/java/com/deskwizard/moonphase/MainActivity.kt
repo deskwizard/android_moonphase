@@ -23,10 +23,14 @@ package com.deskwizard.moonphase
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -104,35 +108,83 @@ fun DataDisplay() {
     val illumination = (MoonData.Illumination * 100.0).roundToInt()
     val imagePadding = 10
 
-    /*
-    Image(
-        painter = painterResource(id = moonPhaseImages[MoonData.ImageIndex]),
-        contentDescription = "Moon Phase Image",
-        Modifier.padding(imagePadding.dp, imagePadding.dp)
-    )
-*/
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth(), content = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = moonPhaseImages[MoonData.ImageIndex]),
-                    contentDescription = "Moon Phase Image",
-                    modifier = Modifier
-                        .size(300.dp)
-                        .padding(25.dp),
-                    contentScale = ContentScale.FillBounds
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.border(BorderStroke(5.dp, Color.Red))
 
-                )
-                Text(moon, fontSize = 25.sp)
-                Text(phase, fontSize = 20.sp)
-                Text("$age% Days old", color = Color.Gray)
-                Text("$illumination% Illumination", color = Color.DarkGray)
-            }
-        }
-    )
-    /*
+                ) {
+                    Image(
+                        painter = painterResource(id = moonPhaseImages[MoonData.ImageIndex]),
+                        contentDescription = "Moon Phase Image",
+                        modifier = Modifier
+                            .size(300.dp)
+                            .padding(25.dp)
+                            .border(BorderStroke(1.dp, Color.Yellow)),
+                        contentScale = ContentScale.FillBounds
+
+                    )
+
+                    Row(
+                        modifier = Modifier
+                    .border(BorderStroke(1.dp, Color.Green))
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Vampire moon", fontSize = 25.sp)
+                            Text("new moon", fontSize = 20.sp)
+                            Text("0 Days old", color = Color.Gray)
+                            Text("0% Illumination", color = Color.DarkGray)
+                        }
+
+                    }
+                    Row(
+                        modifier = Modifier
+                            .border(BorderStroke(5.dp, Color.Blue))
+                    ) {
+
+                        Text("Werewolf Moon", fontSize = 25.sp)
+                        Text("New Moon", fontSize = 20.sp)
+                        Text("14 Days old", color = Color.Gray)
+                        Text("100% Illumination", color = Color.DarkGray)
+                    }
+                    /*
+                    Text("Vampire moon", fontSize = 25.sp)
+                    Text("new moon", fontSize = 20.sp)
+                    Text("0 Days old", color = Color.Gray)
+                    Text("0% Illumination", color = Color.DarkGray)
+
+                     */
+                }
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /*
 Column() {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -156,7 +208,6 @@ Column() {
 
 
 
-}
 
 /*
     Image(
