@@ -29,6 +29,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.work.OneTimeWorkRequest
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
             .build()
 
         // Schedule the WorkRequest with WorkManager
-       // WorkManager.getInstance(this).enqueue(fetchRequest)
+        // WorkManager.getInstance(this).enqueue(fetchRequest)
 
         val fetchRequest2 = OneTimeWorkRequest.Builder(DataFetcherWorker::class.java)
             .setInitialDelay(3, TimeUnit.MINUTES)
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Preview
+
 @Composable
 fun DataDisplay() {
     //val unixTime = System.currentTimeMillis() / 1000
@@ -107,180 +107,108 @@ fun DataDisplay() {
     val moon = MoonData.Name
     val age = MoonData.Age.roundToInt()
     val illumination = (MoonData.Illumination * 100.0).roundToInt()
-    val imagePadding = 10
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    //modifier = Modifier.border(BorderStroke(5.dp, Color.Red))
+    //val imagePadding = 10
+    val moonCalendarImageSize = 75
 
-                ) {
-                    Image(
-                        painter = painterResource(id = moonPhaseImages[MoonData.ImageIndex]),
-                        contentDescription = "Moon Phase Image",
-                        modifier = Modifier
-                            .size(300.dp)
-                            .padding(25.dp)
-                            .border(BorderStroke(1.dp, Color.Yellow)),
-                        contentScale = ContentScale.FillBounds
-                    )
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        //modifier = Modifier.border(BorderStroke(5.dp, Color.Red))
+    ) {
 
-                    Row(
-                        modifier = Modifier
-                    .border(BorderStroke(1.dp, Color.Green))
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("New moon", fontSize = 20.sp)
-                            Text("Vampire moon", fontSize = 25.sp)
-                            Text("0 Days old", color = Color.DarkGray)
-                            Text("0% Illumination", color = Color.DarkGray)
-                        }
+        /*********************** Main Moon Image ***********************/
+        Image(
+            painter = painterResource(id = moonPhaseImages[MoonData.ImageIndex]),
+            contentDescription = "Moon Phase Image",
+            modifier = Modifier
+                .size(300.dp)
+                //.border(BorderStroke(1.dp, Color.Yellow))
+                .padding(25.dp),
+            contentScale = ContentScale.FillBounds
+        )
 
-                    }
-                    Row(
-                        modifier = Modifier
-                            .border(BorderStroke(5.dp, Color.Blue))
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        //verticalAlignment = Alignment.CenterVertically
-                    ) {
+        /*********************** Main Moon Text ***********************/
+        Row(
+            modifier = Modifier
+            //.border(BorderStroke(1.dp, Color.Green))
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("New moon", fontSize = 25.sp)
+                Text("Vampire moon", fontSize = 20.sp)
+                Text("0 Days old", color = Color.DarkGray)
+                Text("0% Illumination", color = Color.DarkGray)
+            }
 
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            //Text("New", fontSize = 20.sp)
-                            Image(
-                                painter = painterResource(id = moonPhaseImages[14]),
-                                contentDescription = "Moon Phase Image",
-                                modifier = Modifier
-                                    .size(75.dp)
-                                 //   .padding(25.dp)
-                                    .border(BorderStroke(1.dp, Color.Yellow)),
-                                contentScale = ContentScale.FillBounds
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            //Text("New", fontSize = 20.sp)
-                            Image(
-                                painter = painterResource(id = moonPhaseImages[21]),
-                                contentDescription = "Moon Phase Image",
-                                modifier = Modifier
-                                    .size(75.dp)
-                                    //   .padding(25.dp)
-                                    .border(BorderStroke(1.dp, Color.Yellow)),
-                                contentScale = ContentScale.FillBounds
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            //Text("New", fontSize = 20.sp)
-                            Image(
-                                painter = painterResource(id = moonPhaseImages[29]),
-                                contentDescription = "Moon Phase Image",
-                                modifier = Modifier
-                                    .size(75.dp)
-                                    //   .padding(25.dp)
-                                    .border(BorderStroke(1.dp, Color.Yellow)),
-                                contentScale = ContentScale.FillBounds
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            //Text("New", fontSize = 20.sp)
-                            Image(
-                                painter = painterResource(id = moonPhaseImages[7]),
-                                contentDescription = "Moon Phase Image",
-                                modifier = Modifier
-                                    .size(75.dp)
-                                    //   .padding(25.dp)
-                                    .border(BorderStroke(1.dp, Color.Yellow)),
-                                contentScale = ContentScale.FillBounds
-                            )
-                        }
-/*
+        }
 
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Vampire", fontSize = 25.sp)
-                        }
+        Spacer(modifier = Modifier.height(20.dp))
 
+        /*********************** Moon Calendar  ***********************/
+        Row(
+            modifier = Modifier
+                //.border(BorderStroke(2.dp, Color.Blue))
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
 
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("14 Days old", color = Color.Gray)
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("100% ", color = Color.DarkGray)
-                        }
-                        */
-                        /*
-                        Text("Werewolf Moon", fontSize = 25.sp)
-                        Text("New Moon", fontSize = 20.sp)
-                        Text("14 Days old", color = Color.Gray)
-                        Text("100% Illumination", color = Color.DarkGray)
-                        */
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(id = moonPhaseImages[14]),
+                    contentDescription = "Full Moon Image",
+                    modifier = Modifier
+                        //.border(BorderStroke(1.dp, Color.Yellow))
+                        .size(moonCalendarImageSize.dp),
+                    contentScale = ContentScale.FillBounds
+                )
+                Text("Aug. 4")
+            }
 
-                    }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(id = moonPhaseImages[21]),
+                    contentDescription = "Moon Phase Image",
+                    modifier = Modifier
+                        //.border(BorderStroke(1.dp, Color.Yellow))
+                        .size(moonCalendarImageSize.dp),
+                    contentScale = ContentScale.FillBounds
+                )
+                Text("Aug. 11")
 
-                }
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(id = moonPhaseImages[29]),
+                    contentDescription = "New Moon Image",
+                    modifier = Modifier
+                        //.border(BorderStroke(1.dp, Color.Yellow))
+                        .size(moonCalendarImageSize.dp),
+                    contentScale = ContentScale.FillBounds
+                )
+                Text("Aug. 18")
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(id = moonPhaseImages[7]),
+                    contentDescription = "Moon Phase Image",
+                    modifier = Modifier
+                        //.border(BorderStroke(1.dp, Color.Yellow))
+                        .size(moonCalendarImageSize.dp),
+                    contentScale = ContentScale.FillBounds
+                )
+                Text("Aug. 25")
+            }
+        }   // End moon Calendar
 
-
-
-
-
+    }    // End main column
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /*
-Column() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        Text(text = " Text 1")
-        Text(text = " Text 2")
-        Text(text = " Text 3")
-    }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        Text(text = " Text 4")
-        Text(text = " Text 5")
-        Text(text = " Text 6")
-    }
-}*/
-
-
-
-
 /*
-    Image(
-        painter = painterResource(id = moonPhaseImages[MoonData.ImageIndex]),
-        contentDescription = "Moon Phase Image"
-        )
 
-    Text(
         // Keep for debug
+    Text(
         //val date = LocalDateTime.ofInstant(Instant.ofEpochSecond(unixTime), ZoneId.systemDefault())
         //text = "Unix Time: $unixTime \n Date: ${date.toLocalDate()} \n Time: ${date.toLocalTime()} \n Moon: $moon \n Image Index: $index \n Age: $age days \n Phase: $phase \n Illumination: $illumination%",
         text = " $moon \n $phase ($age days old) \n $illumination% Illumination \n\n",
-        )
+     )
     */
