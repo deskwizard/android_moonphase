@@ -58,7 +58,7 @@ class MoonPreferenceProvider (context: Context) {
     }
 
     private fun loadFloat (key: String): Float {
-        val value = sharedPref.getFloat(key, 6.85F)
+        val value = sharedPref.getFloat(key, 0.85F)
         //println("++++++++++ Loading key $key: $value +++++++++++")
         return value
     }
