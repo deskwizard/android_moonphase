@@ -26,6 +26,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -110,7 +111,7 @@ fun DataDisplay() {
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.border(BorderStroke(5.dp, Color.Red))
+                    //modifier = Modifier.border(BorderStroke(5.dp, Color.Red))
 
                 ) {
                     Image(
@@ -121,7 +122,6 @@ fun DataDisplay() {
                             .padding(25.dp)
                             .border(BorderStroke(1.dp, Color.Yellow)),
                         contentScale = ContentScale.FillBounds
-
                     )
 
                     Row(
@@ -129,9 +129,9 @@ fun DataDisplay() {
                     .border(BorderStroke(1.dp, Color.Green))
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("New moon", fontSize = 20.sp)
                             Text("Vampire moon", fontSize = 25.sp)
-                            Text("new moon", fontSize = 20.sp)
-                            Text("0 Days old", color = Color.Gray)
+                            Text("0 Days old", color = Color.DarkGray)
                             Text("0% Illumination", color = Color.DarkGray)
                         }
 
@@ -139,20 +139,82 @@ fun DataDisplay() {
                     Row(
                         modifier = Modifier
                             .border(BorderStroke(5.dp, Color.Blue))
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        //verticalAlignment = Alignment.CenterVertically
                     ) {
 
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            //Text("New", fontSize = 20.sp)
+                            Image(
+                                painter = painterResource(id = moonPhaseImages[14]),
+                                contentDescription = "Moon Phase Image",
+                                modifier = Modifier
+                                    .size(75.dp)
+                                 //   .padding(25.dp)
+                                    .border(BorderStroke(1.dp, Color.Yellow)),
+                                contentScale = ContentScale.FillBounds
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            //Text("New", fontSize = 20.sp)
+                            Image(
+                                painter = painterResource(id = moonPhaseImages[21]),
+                                contentDescription = "Moon Phase Image",
+                                modifier = Modifier
+                                    .size(75.dp)
+                                    //   .padding(25.dp)
+                                    .border(BorderStroke(1.dp, Color.Yellow)),
+                                contentScale = ContentScale.FillBounds
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            //Text("New", fontSize = 20.sp)
+                            Image(
+                                painter = painterResource(id = moonPhaseImages[29]),
+                                contentDescription = "Moon Phase Image",
+                                modifier = Modifier
+                                    .size(75.dp)
+                                    //   .padding(25.dp)
+                                    .border(BorderStroke(1.dp, Color.Yellow)),
+                                contentScale = ContentScale.FillBounds
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            //Text("New", fontSize = 20.sp)
+                            Image(
+                                painter = painterResource(id = moonPhaseImages[7]),
+                                contentDescription = "Moon Phase Image",
+                                modifier = Modifier
+                                    .size(75.dp)
+                                    //   .padding(25.dp)
+                                    .border(BorderStroke(1.dp, Color.Yellow)),
+                                contentScale = ContentScale.FillBounds
+                            )
+                        }
+/*
+
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Vampire", fontSize = 25.sp)
+                        }
+
+
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("14 Days old", color = Color.Gray)
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("100% ", color = Color.DarkGray)
+                        }
+                        */
+                        /*
                         Text("Werewolf Moon", fontSize = 25.sp)
                         Text("New Moon", fontSize = 20.sp)
                         Text("14 Days old", color = Color.Gray)
                         Text("100% Illumination", color = Color.DarkGray)
-                    }
-                    /*
-                    Text("Vampire moon", fontSize = 25.sp)
-                    Text("new moon", fontSize = 20.sp)
-                    Text("0 Days old", color = Color.Gray)
-                    Text("0% Illumination", color = Color.DarkGray)
+                        */
 
-                     */
+                    }
+
                 }
 
 
