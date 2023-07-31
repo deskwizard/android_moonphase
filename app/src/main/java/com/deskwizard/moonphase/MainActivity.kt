@@ -104,7 +104,7 @@ fun DataDisplay() {
     //val unixTime = System.currentTimeMillis() / 1000
 
     val phase = MoonData.Phase
-    val moon = MoonData.Name
+    val name = MoonData.Name
     val age = MoonData.Age.roundToInt()
     val illumination = (MoonData.Illumination * 100.0).roundToInt()
 
@@ -133,10 +133,14 @@ fun DataDisplay() {
             //.border(BorderStroke(1.dp, Color.Green))
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("New moon", fontSize = 25.sp)
+                Text(phase, fontSize = 25.sp)
+                Text(name, fontSize = 20.sp)
+                Text("$age Days Old", color = Color.DarkGray)
+                Text("$illumination% Illumination", color = Color.DarkGray)
+/*                Text("New moon", fontSize = 25.sp)
                 Text("Vampire moon", fontSize = 20.sp)
                 Text("0 Days old", color = Color.DarkGray)
-                Text("0% Illumination", color = Color.DarkGray)
+                Text("0% Illumination", color = Color.DarkGray)*/
             }
 
         }
@@ -201,14 +205,3 @@ fun DataDisplay() {
 
     }    // End main column
 }
-
-
-/*
-
-        // Keep for debug
-    Text(
-        //val date = LocalDateTime.ofInstant(Instant.ofEpochSecond(unixTime), ZoneId.systemDefault())
-        //text = "Unix Time: $unixTime \n Date: ${date.toLocalDate()} \n Time: ${date.toLocalTime()} \n Moon: $moon \n Image Index: $index \n Age: $age days \n Phase: $phase \n Illumination: $illumination%",
-        text = " $moon \n $phase ($age days old) \n $illumination% Illumination \n\n",
-     )
-    */
