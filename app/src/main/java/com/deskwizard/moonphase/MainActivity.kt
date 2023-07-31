@@ -24,9 +24,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,11 +37,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,6 +60,7 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkRequest
 import com.deskwizard.moonphase.NetworkAPI.startImmediateDataFetch
 import com.deskwizard.moonphase.ui.theme.MoonPhaseTheme
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -93,7 +98,6 @@ class MainActivity : ComponentActivity() {
         /******************************** The rest ********************************/
         setContent {
             MoonPhaseTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -105,9 +109,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun DataDisplay(context: Context) {
+    var text by remember { mutableStateOf("Click a button") }
+
     //val unixTime = System.currentTimeMillis() / 1000
 
     val phase = MoonData.Phase
@@ -115,7 +120,6 @@ fun DataDisplay(context: Context) {
     val age = MoonData.Age.roundToInt()
     val illumination = (MoonData.Illumination * 100.0).roundToInt()
 
-    //val imagePadding = 10
     val moonCalendarImageSize = 75
 
     Column(
@@ -251,9 +255,41 @@ fun DataDisplay(context: Context) {
                 .fillMaxHeight()
         ) {
             Text("Last Updated: 4 days ago")
-
-
+/*
+            Button(onClick = { text = "Button 1 Clicked" }) {
+                Text(text = text)
+            }
+*/
+            ClickableText(
+                text = AnnotatedString(text),
+                onClick = {
+                    println("ClickableText")
+                    text = "ah AH!"
+                    startImmediateDataFetch(context)
+                }
+            )
 
         }
     }    // End main column
+//    var text by remember { mutableStateOf("Click a button") }
+
+/*    Button(onClick = { text = "Button 1 Clicked" }) {
+        Text(text = text)
+    }*/
+
 }
+
+/*
+
+//val text = mutableStateOf("text")
+// or
+var text = MutableStateFlow("text")
+
+@Composable
+fun MyText() {
+    //val myText by text
+    // or
+    val myText by text.collectAsState()
+    //Text(myText)
+}
+*/
