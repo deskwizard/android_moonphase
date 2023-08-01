@@ -1,3 +1,5 @@
+// Just a basic test of notifications
+
 package com.deskwizard.moonphase
 
 import android.annotation.SuppressLint
@@ -23,14 +25,13 @@ object NotificationHelper {
             val channel =
                 NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT)
             val notificationManager = getSystemService(context, NotificationManager::class.java)
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(channel)
-            }
+            notificationManager?.createNotificationChannel(channel)
         }
 
-        val notificationWorkRequest: WorkRequest = OneTimeWorkRequest.Builder(NotificationWorker::class.java)
-            .setInitialDelay(30, TimeUnit.SECONDS)
-            .build()
+        val notificationWorkRequest: WorkRequest =
+            OneTimeWorkRequest.Builder(NotificationWorker::class.java)
+                .setInitialDelay(30, TimeUnit.SECONDS)
+                .build()
 
         // Schedule the WorkRequest with WorkManager
         WorkManager.getInstance(context).enqueue(notificationWorkRequest)

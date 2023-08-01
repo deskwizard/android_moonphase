@@ -16,7 +16,8 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 
 // TODO: Make the returned value actually do something useful...
-class DataFetcherWorker(private val context: Context, params: WorkerParameters) : Worker(context, params) {
+class DataFetcherWorker(private val context: Context, params: WorkerParameters) :
+    Worker(context, params) {
 
     @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
     override fun doWork(): Result {
@@ -32,24 +33,34 @@ object NetworkAPI {
     private val format = Json { ignoreUnknownKeys = true; isLenient = true }
 
     @Serializable
-    class MoonJSON(val Moon: String, val Index: Int, val Age: Float, val Phase: String, val Illumination: Float)
+    class MoonJSON(
+        val Moon: String,
+        val Index: Int,
+        val Age: Float,
+        val Phase: String,
+        val Illumination: Float
+    )
 
     fun startImmediateDataFetch(context: Context) {
         println("Immediate fetch requested")
         val fetchRequest: WorkRequest = OneTimeWorkRequest.Builder(DataFetcherWorker::class.java)
-            //.setInitialDelay(60, TimeUnit.SECONDS)
             .build()
 
         // Schedule the WorkRequest with WorkManager
-         WorkManager.getInstance(context).enqueue(fetchRequest)
+        WorkManager.getInstance(context).enqueue(fetchRequest)
     }
 
+    // TODO: Always fails, but one time task works with the same worker ??
     fun startDataFetcher(context: Context) {
-        val dataFetcherWorkRequest: PeriodicWorkRequest = PeriodicWorkRequest.Builder(DataFetcherWorker::class.java,15L, TimeUnit.MINUTES)
-            .setInitialDelay(1, TimeUnit.MINUTES)
-            .build()
+        val dataFetcherWorkRequest: PeriodicWorkRequest =
+            PeriodicWorkRequest.Builder(DataFetcherWorker::class.java, 15L, TimeUnit.MINUTES)
+                .build()
 
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork("dataFetcherWorker", ExistingPeriodicWorkPolicy.KEEP, dataFetcherWorkRequest)
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "dataFetcherWorker",
+            ExistingPeriodicWorkPolicy.KEEP,
+            dataFetcherWorkRequest
+        )
     }
 
     fun moonDataFetcher(context: Context) {
@@ -91,7 +102,7 @@ object NetworkAPI {
         MoonData.ImageIndex = fetchedMoonJSON.Index
         MoonData.LastUpdateTime = unixTime
 
-        MoonPreferenceProvider (context).saveAll()
+        MoonPreferenceProvider(context).saveAll()
 
     }
 }

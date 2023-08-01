@@ -13,8 +13,8 @@
             - Moon phase home screen widget
             - fetch/find/display next moon events (full, half, new, other half...)
             - App settings?
-            - Add day info JSON
-            -
+            - Add day info JSON?
+
  */
 
 
@@ -37,13 +37,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,9 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkRequest
-import com.deskwizard.moonphase.NetworkAPI.startImmediateDataFetch
 import com.deskwizard.moonphase.ui.theme.MoonPhaseTheme
-import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -71,25 +67,21 @@ class MainActivity : ComponentActivity() {
 
         /******************************** Notifications ********************************/
 
-        //NotificationHelper.startNotificationHelper(this)
+        //NotificationHelper.startNotificationHelper(this) // WIP is an understatement
 
         /******************************** Data fetcher task ********************************/
 
         //NetworkAPI.startDataFetcher(this)
 
-        val fetchRequest: WorkRequest = OneTimeWorkRequest.Builder(DataFetcherWorker::class.java)
-            .setInitialDelay(60, TimeUnit.SECONDS)
-            .build()
+        /*
+                val fetchRequest: WorkRequest = OneTimeWorkRequest.Builder(DataFetcherWorker::class.java)
+                    .setInitialDelay(60, TimeUnit.SECONDS)
+                    .build()
 
-        // Schedule the WorkRequest with WorkManager
-        // WorkManager.getInstance(this).enqueue(fetchRequest)
+                // Schedule the WorkRequest with WorkManager
+                // WorkManager.getInstance(this).enqueue(fetchRequest)
 
-        val fetchRequest2 = OneTimeWorkRequest.Builder(DataFetcherWorker::class.java)
-            .setInitialDelay(3, TimeUnit.MINUTES)
-            .build()
-
-        // Schedule the WorkRequest with WorkManager
-        //WorkManager.getInstance(this).enqueue(fetchRequest2)
+        */
 
         /******************************** Preferences ********************************/
 
@@ -111,8 +103,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun DataDisplay(context: Context) {
-    var text by remember { mutableStateOf("Click a button") }
-
+    var text by remember { mutableStateOf("Click to update") }
     //val unixTime = System.currentTimeMillis() / 1000
 
     val phase = MoonData.Phase
@@ -255,41 +246,18 @@ fun DataDisplay(context: Context) {
                 .fillMaxHeight()
         ) {
             Text("Last Updated: 4 days ago")
-/*
-            Button(onClick = { text = "Button 1 Clicked" }) {
-                Text(text = text)
-            }
-*/
+
             ClickableText(
                 text = AnnotatedString(text),
                 onClick = {
+                    NetworkAPI.startImmediateDataFetch(context)
                     println("ClickableText")
-                    text = "ah AH!"
-                    startImmediateDataFetch(context)
+                    text = "Well I tried..."
                 }
             )
 
         }
     }    // End main column
-//    var text by remember { mutableStateOf("Click a button") }
-
-/*    Button(onClick = { text = "Button 1 Clicked" }) {
-        Text(text = text)
-    }*/
 
 }
 
-/*
-
-//val text = mutableStateOf("text")
-// or
-var text = MutableStateFlow("text")
-
-@Composable
-fun MyText() {
-    //val myText by text
-    // or
-    val myText by text.collectAsState()
-    //Text(myText)
-}
-*/
