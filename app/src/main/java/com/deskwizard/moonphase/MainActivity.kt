@@ -233,8 +233,8 @@ fun DisplayMoonCalendar() {
 }
 
 @Composable
-fun DisplayUpdateClicketyClick(context: Context, potato: Long = 0L) {
-    //var text by remember { mutableStateOf("Last updated: Never") }
+fun DisplayUpdateClicketyClick(context: Context) {
+    var text by remember { mutableStateOf("Last updated: Never") }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -263,7 +263,7 @@ fun DisplayUpdateClicketyClick(context: Context, potato: Long = 0L) {
 }
 
 fun updateClick(context: Context): String {
-    //NetworkAPI.startImmediateDataFetch(context)
+    NetworkAPI.startImmediateDataFetch(context)
 
     var lastUpdateUnitText = "Seconds"
     var lastUpdateValue = 0
