@@ -6,7 +6,7 @@ object MoonData {
     var Age: Float = 0.0F
     var Illumination: Float = 0.0F
     var ImageIndex = 0
-    var LastUpdateTime: Long = 0
+    var LastUpdateTime: Long = 0L
 }
 
 var moonPhaseImages = arrayOf(

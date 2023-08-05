@@ -104,5 +104,7 @@ object NetworkAPI {
 
         MoonPreferenceProvider(context).saveAll()
 
+        // TODO: Somehow update all the displayed data
+
     }
 }
