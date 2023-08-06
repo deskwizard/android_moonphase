@@ -1,6 +1,9 @@
 package com.deskwizard.moonphase
 
-object MoonData {
+import kotlinx.serialization.Serializable
+
+@Serializable
+class MoonData {
     var Name: String = ""
     var Phase: String = ""
     var Age: Float = 0.0F
@@ -8,6 +11,7 @@ object MoonData {
     var ImageIndex = 0
     var LastUpdateTime: Long = 0L
 }
+
 
 var moonPhaseImages = arrayOf(
     R.drawable.moon_phase_0,

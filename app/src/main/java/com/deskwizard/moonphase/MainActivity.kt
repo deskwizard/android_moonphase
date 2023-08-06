@@ -24,6 +24,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,12 +56,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import com.deskwizard.moonphase.ui.theme.MoonPhaseTheme
 import kotlin.math.roundToInt
 
 
-class MainActivity : ComponentActivity() {
+class MoonPhaseViewModel : ViewModel() {
+    var moonInfo by mutableStateOf<MoonData>(MoonData())
+        private set
 
+    fun setMoonData(newMoonData: MoonData) {
+        moonInfo = newMoonData
+    }
+}
+
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -76,43 +86,27 @@ class MainActivity : ComponentActivity() {
 
         /******************************** Preferences ********************************/
 
-        MoonPreferenceProvider(this).loadAll()  // Load saved data
+        val viewModel: MoonPhaseViewModel by viewModels()
+
+        val moon_data_from_prefs = MoonPreferenceProvider(this).loadAll()  // Load saved data
+        viewModel.setMoonData(moon_data_from_prefs)
 
         /******************************** The rest ********************************/
-        /*        setContent {
-                    MoonPhaseTheme {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            color = MaterialTheme.colorScheme.background
-                        ) {
-                            DataDisplay(this)
-                        }
-                    }
-                }*/
-    }
-
-    override fun onResume() {
-        super.onResume()
         setContent {
             MoonPhaseTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    println("********** resume ***********")
-                    MoonPreferenceProvider(this).loadAll()  // Load saved data
-                    DataDisplay(this)
+                    DataDisplay(viewModel,this)
                 }
             }
         }
-
-
     }
 }
 
-
 @Composable
-fun DataDisplay(context: Context) {
+fun DataDisplay(viewModel: MoonPhaseViewModel, context: Context) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -123,113 +117,40 @@ fun DataDisplay(context: Context) {
         //modifier = Modifier.border(BorderStroke(5.dp, Color.Red))
     ) {
 
-        DisplayMoonImage()
-        DisplayMoonInfo()
+        DisplayMoonImage(viewModel)
+        DisplayMoonInfo(viewModel)
         Spacer(modifier = Modifier.height(20.dp))
         DisplayMoonCalendar()
-        DisplayUpdateClicketyClick(context)
+        DisplayUpdateClickClick(viewModel, context)
     }    // End main column
 
 }
-
-
 @Composable
-fun DisplayUpdateClicketyClick(context: Context) {
-    var text by remember { mutableStateOf("Last updated: Never") }
-    //MoonPreferenceProvider(context).loadAll()  // Load saved data
-
-    println("-------------- clickety")
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
-        modifier = Modifier
-            //.border(BorderStroke(5.dp, Color.Green))
-            .fillMaxHeight()
-    ) {
-
-        Text(
+fun DisplayMoonImage(viewModel: MoonPhaseViewModel) {
+    if (viewModel.moonInfo != null) {
+        Image(
+            painter = painterResource(id = moonPhaseImages[viewModel.moonInfo.ImageIndex]),
+            contentDescription = "Moon Phase Image",
             modifier = Modifier
-                .clickable(enabled = true) {
-                    println("ClickableText1")
-                    NetworkAPI.startImmediateDataFetch(context)
-                    text = updateClick(context)
-                },
-            text = updateClick(context)
-            //text = text
+                .size(300.dp)
+                //.border(BorderStroke(1.dp, Color.Yellow))
+                .padding(25.dp),
+            contentScale = ContentScale.FillBounds
         )
-
-        ClickableText(
-            text = AnnotatedString("(Click to update)"),
-            onClick = {
-                println("ClickableText2")
-            }
-        )
-
     }
-}
-
-fun updateClick(context: Context): String {
-
-    //NetworkAPI.startImmediateDataFetch(context)
-
-    println("update click")
-    var lastUpdateUnitText = "Seconds"
-    var lastUpdateValue = MoonData.LastUpdateTime
-
-    if (MoonData.LastUpdateTime == 0L) {
-        println("------------- oh zero!")
-        return "Last updated: Never"
-    }
-
-    // Get delta:
-    val lastUpdateDelta = (System.currentTimeMillis() / 1000) - MoonData.LastUpdateTime
-    println("------ delta: $lastUpdateDelta")
-
-    if (lastUpdateDelta > 86400L) {
-        // days
-        lastUpdateValue = (lastUpdateDelta / 86400L)
-        lastUpdateUnitText = "day(s)"
-    } else if (lastUpdateDelta > 3600L) {
-        // hours
-        lastUpdateValue = (lastUpdateDelta / 3600L)
-        lastUpdateUnitText = "Hour(s)"
-    } else if (lastUpdateDelta > 60L) {
-        // minutes
-        lastUpdateValue = (lastUpdateDelta / 60)
-        lastUpdateUnitText = "Minute(s)"
-    } else {
-        lastUpdateValue = lastUpdateDelta
-        lastUpdateUnitText = "Seconds"
-    }
-
-    return "Last Updated: $lastUpdateValue $lastUpdateUnitText ago"
 }
 
 @Composable
-fun DisplayMoonImage() {
-    Image(
-        painter = painterResource(id = moonPhaseImages[MoonData.ImageIndex]),
-        contentDescription = "Moon Phase Image",
-        modifier = Modifier
-            .size(300.dp)
-            //.border(BorderStroke(1.dp, Color.Yellow))
-            .padding(25.dp),
-        contentScale = ContentScale.FillBounds
-    )
-}
-
-@Composable
-fun DisplayMoonInfo() {
+fun DisplayMoonInfo(viewModel: MoonPhaseViewModel) {
     Row(
         modifier = Modifier
         //.border(BorderStroke(1.dp, Color.Green))
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(MoonData.Phase, fontSize = 25.sp)
-            Text(MoonData.Name, fontSize = 20.sp)
-            Text("${MoonData.Age.roundToInt()} Days Old", color = Color.DarkGray)
-            Text("${MoonData.Illumination.roundToInt()}% Illumination", color = Color.DarkGray)
+            Text(viewModel.moonInfo.Phase, fontSize = 25.sp)
+            Text(viewModel.moonInfo.Name, fontSize = 20.sp)
+            Text("${viewModel.moonInfo.Age.roundToInt()} Days Old", color = Color.DarkGray)
+            Text("${(viewModel.moonInfo.Illumination * 100.0).roundToInt()}% Illumination", color = Color.DarkGray)
         }
 
     }
@@ -325,4 +246,69 @@ fun DisplayMoonCalendar() {
         }
     }   // End moon Calendar
 
+}
+
+@Composable
+fun DisplayUpdateClickClick(    viewModel: MoonPhaseViewModel, context: Context) {
+    var text by remember { mutableStateOf("Last updated: Never") }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier
+            //.border(BorderStroke(5.dp, Color.Green))
+            .fillMaxHeight()
+    ) {
+
+        Text(
+            modifier = Modifier
+                .clickable(enabled = true) {
+                    println("ClickableText1")
+
+                    NetworkAPI.startImmediateDataFetch(viewModel, context)
+                },
+            text = updateClick(viewModel, context)
+        )
+
+        ClickableText(
+            text = AnnotatedString("(Click to update)"),
+            onClick = {
+            }
+        )
+
+    }
+}
+
+fun updateClick(viewModel: MoonPhaseViewModel, context: Context): String {
+    var lastUpdateUnitText = "Seconds"
+    var lastUpdateValue = 0
+
+    if (viewModel.moonInfo.LastUpdateTime == 0L) {
+        println("---------------- Zero!  ------------")
+        return "Last updated: Never"
+    }
+
+    // Get delta:
+    val lastUpdateDelta = (System.currentTimeMillis() / 1000) - viewModel.moonInfo.LastUpdateTime
+    println("------ delta: $lastUpdateDelta")
+
+    if (lastUpdateDelta > 86400L) {
+        // days
+        lastUpdateValue = (lastUpdateDelta / 86400L).toInt()
+        lastUpdateUnitText = "days"
+    } else if (lastUpdateDelta > 3600L) {
+        // hours
+        lastUpdateValue = (lastUpdateDelta / 3600L).toInt()
+        lastUpdateUnitText = "Hours"
+    } else if (lastUpdateDelta > 60L) {
+        // minutes
+        lastUpdateValue = (lastUpdateDelta / 60).toInt()
+        lastUpdateUnitText = "Minutes"
+    }
+    else {
+        lastUpdateValue = lastUpdateDelta.toInt()
+        lastUpdateUnitText = "Seconds"
+    }
+
+    return "Last Updated: $lastUpdateValue $lastUpdateUnitText ago"
 }

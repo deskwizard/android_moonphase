@@ -9,7 +9,7 @@ import androidx.work.impl.utils.PREFERENCE_FILE_KEY
 @SuppressLint("ApplySharedPref")
 class MoonPreferenceProvider(context: Context) {
 
-    val sharedPref: SharedPreferences =
+    private val sharedPref: SharedPreferences =
         context.getSharedPreferences(PREFERENCE_FILE_KEY, MODE_PRIVATE)
 
 
@@ -45,47 +45,51 @@ class MoonPreferenceProvider(context: Context) {
         }
     }
 
-    fun saveAll() {
-        save("Name", MoonData.Name)
-        save("Phase", MoonData.Phase)
-        save("Age", MoonData.Age)
-        save("Illumination", MoonData.Illumination)
-        save("ImageIndex", MoonData.ImageIndex)
-        save("LastUpdateTime", MoonData.LastUpdateTime)
+    fun saveAll(MoonDataObject:MoonData) {
+        save("Name", MoonDataObject.Name)
+        save("Phase", MoonDataObject.Phase)
+        save("Age", MoonDataObject.Age)
+        save("Illumination", MoonDataObject.Illumination)
+        save("ImageIndex", MoonDataObject.ImageIndex)
+        save("LastUpdateTime", MoonDataObject.LastUpdateTime)
         println("---------- Saved all values ----------")
     }
 
     private fun loadString(key: String): String? {
         val value = sharedPref.getString(key, "No Data")
-        //println("++++++++++ Loading key $key: $value +++++++++++")
+        println("++++++++++ Loading key $key: $value +++++++++++")
         return value
     }
 
     private fun loadFloat(key: String): Float {
         val value = sharedPref.getFloat(key, 0.0F)
-        //println("++++++++++ Loading key $key: $value +++++++++++")
+        println("++++++++++ Loading key $key: $value +++++++++++")
         return value
     }
 
     private fun loadInt(key: String): Int {
         val value = sharedPref.getInt(key, 0)
-        //println("++++++++++ Loading key $key: $value +++++++++++")
+        println("++++++++++ Loading key $key: $value +++++++++++")
         return value
     }
 
     private fun loadLong(key: String): Long {
         val value = sharedPref.getLong(key, 0)
-        //println("++++++++++ Loading key $key: $value +++++++++++")
+        println("++++++++++ Loading key $key: $value +++++++++++")
         return value
     }
 
-    fun loadAll() {
-        MoonData.Name = loadString("Name").toString()
-        MoonData.Phase = loadString("Phase").toString()
-        MoonData.Age = loadFloat("Age")
-        MoonData.Illumination = loadFloat("Illumination")
-        MoonData.ImageIndex = loadInt("ImageIndex")
-        MoonData.LastUpdateTime = loadLong("LastUpdateTime")
+    fun loadAll() : MoonData {
+        val moonDataObject = MoonData()
+
+        moonDataObject.Name = loadString("Name").toString()
+        moonDataObject.Phase = loadString("Phase").toString()
+        moonDataObject.Age = loadFloat("Age")
+        moonDataObject.Illumination = loadFloat("Illumination")
+        moonDataObject.ImageIndex = loadInt("ImageIndex")
+        moonDataObject.LastUpdateTime = loadLong("LastUpdateTime")
         println("---------- Loaded all values ----------")
+
+        return moonDataObject
     }
 }

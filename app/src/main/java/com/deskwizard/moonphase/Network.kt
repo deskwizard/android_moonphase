@@ -2,9 +2,13 @@ package com.deskwizard.moonphase
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.Worker
@@ -23,8 +27,14 @@ class DataFetcherWorker(private val context: Context, params: WorkerParameters) 
     override fun doWork(): Result {
 
         // Perform the background task here
-        NetworkAPI.moonDataFetcher(context)
-        return Result.success()
+        val moon_data = NetworkAPI.moonDataFetcher(context)
+
+        if (moon_data != null) {
+            val data_fetcher_success_data = Data.Builder().putString("json", moon_data).build()
+            return Result.success(data_fetcher_success_data)
+        }
+
+        return Result.failure()
     }
 }
 
@@ -41,10 +51,36 @@ object NetworkAPI {
         val Illumination: Float
     )
 
-    fun startImmediateDataFetch(context: Context) {
+    fun startImmediateDataFetch(viewModel: MoonPhaseViewModel, context: Context) {
         println("Immediate fetch requested")
         val fetchRequest: WorkRequest = OneTimeWorkRequest.Builder(DataFetcherWorker::class.java)
             .build()
+
+        // https://developer.android.com/guide/background/persistent/how-to/observe
+        WorkManager.getInstance(context).getWorkInfoByIdLiveData(fetchRequest.id).observe(
+            ProcessLifecycleOwner.get(),
+            Observer {
+                if (it.state == WorkInfo.State.SUCCEEDED) {
+                    val returnedMoonJSON = it.outputData.getString("json")
+                    if (returnedMoonJSON != null) {
+                        val fetchedMoonJSON = format.decodeFromString<MoonJSON>(returnedMoonJSON)
+
+                        val unixTime = System.currentTimeMillis() / 1000
+                        var moonSuccess = MoonData()
+                        moonSuccess.Name = fetchedMoonJSON.Moon
+                        moonSuccess.Phase = fetchedMoonJSON.Phase
+                        moonSuccess.Age = fetchedMoonJSON.Age
+                        moonSuccess.Illumination = fetchedMoonJSON.Illumination
+                        moonSuccess.ImageIndex = fetchedMoonJSON.Index
+                        moonSuccess.LastUpdateTime = unixTime
+
+                        MoonPreferenceProvider(context).saveAll(moonSuccess)
+
+                        viewModel.setMoonData(moonSuccess)
+                    }
+                }
+            }
+        )
 
         // Schedule the WorkRequest with WorkManager
         WorkManager.getInstance(context).enqueue(fetchRequest)
@@ -63,8 +99,7 @@ object NetworkAPI {
         )
     }
 
-    fun moonDataFetcher(context: Context) {
-
+    fun moonDataFetcher(context: Context) :String? {
         val unixTime = System.currentTimeMillis() / 1000
 
         var returnedMoonJSON: String
@@ -87,24 +122,14 @@ object NetworkAPI {
         } catch (e: Exception) {
             println("--------- Network Exception --------")
             e.printStackTrace()
-            return
+            return null
         }
 
         // If we get here, we have valid JSON
         val filteredCharacters = "[]"
         returnedMoonJSON = returnedMoonJSON.filterNot { filteredCharacters.indexOf(it) > -1 }
-        val fetchedMoonJSON = format.decodeFromString<MoonJSON>(returnedMoonJSON)
+        //val fetchedMoonJSON = format.decodeFromString<MoonJSON>(returnedMoonJSON)
 
-        MoonData.Name = fetchedMoonJSON.Moon
-        MoonData.Phase = fetchedMoonJSON.Phase
-        MoonData.Age = fetchedMoonJSON.Age
-        MoonData.Illumination = fetchedMoonJSON.Illumination
-        MoonData.ImageIndex = fetchedMoonJSON.Index
-        MoonData.LastUpdateTime = unixTime
-
-        MoonPreferenceProvider(context).saveAll()
-
-        // TODO: Somehow update all the displayed data
-
+        return returnedMoonJSON
     }
 }
