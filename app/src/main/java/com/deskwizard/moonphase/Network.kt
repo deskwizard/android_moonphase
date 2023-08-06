@@ -68,7 +68,7 @@ object NetworkAPI {
         val unixTime = System.currentTimeMillis() / 1000
 
         var returnedMoonJSON: String
-        val url = URL("http://api.farmsense.net:80/v1/moonphases/?d=$unixTime")
+        val url = URL("https://api.farmsense.net/v1/moonphases/?d=$unixTime")
         val builder = OkHttpClient.Builder()
         builder.connectTimeout(30, TimeUnit.SECONDS)
         builder.readTimeout(30, TimeUnit.SECONDS)

@@ -60,6 +60,7 @@ import kotlin.math.roundToInt
 
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -78,18 +79,37 @@ class MainActivity : ComponentActivity() {
         MoonPreferenceProvider(this).loadAll()  // Load saved data
 
         /******************************** The rest ********************************/
+        /*        setContent {
+                    MoonPhaseTheme {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background
+                        ) {
+                            DataDisplay(this)
+                        }
+                    }
+                }*/
+    }
+
+    override fun onResume() {
+        super.onResume()
         setContent {
             MoonPhaseTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    println("********** resume ***********")
+                    MoonPreferenceProvider(this).loadAll()  // Load saved data
                     DataDisplay(this)
                 }
             }
         }
+
+
     }
 }
+
 
 @Composable
 fun DataDisplay(context: Context) {
@@ -111,6 +131,81 @@ fun DataDisplay(context: Context) {
     }    // End main column
 
 }
+
+
+@Composable
+fun DisplayUpdateClicketyClick(context: Context) {
+    var text by remember { mutableStateOf("Last updated: Never") }
+    //MoonPreferenceProvider(context).loadAll()  // Load saved data
+
+    println("-------------- clickety")
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier
+            //.border(BorderStroke(5.dp, Color.Green))
+            .fillMaxHeight()
+    ) {
+
+        Text(
+            modifier = Modifier
+                .clickable(enabled = true) {
+                    println("ClickableText1")
+                    NetworkAPI.startImmediateDataFetch(context)
+                    text = updateClick(context)
+                },
+            text = updateClick(context)
+            //text = text
+        )
+
+        ClickableText(
+            text = AnnotatedString("(Click to update)"),
+            onClick = {
+                println("ClickableText2")
+            }
+        )
+
+    }
+}
+
+fun updateClick(context: Context): String {
+
+    //NetworkAPI.startImmediateDataFetch(context)
+
+    println("update click")
+    var lastUpdateUnitText = "Seconds"
+    var lastUpdateValue = MoonData.LastUpdateTime
+
+    if (MoonData.LastUpdateTime == 0L) {
+        println("------------- oh zero!")
+        return "Last updated: Never"
+    }
+
+    // Get delta:
+    val lastUpdateDelta = (System.currentTimeMillis() / 1000) - MoonData.LastUpdateTime
+    println("------ delta: $lastUpdateDelta")
+
+    if (lastUpdateDelta > 86400L) {
+        // days
+        lastUpdateValue = (lastUpdateDelta / 86400L)
+        lastUpdateUnitText = "day(s)"
+    } else if (lastUpdateDelta > 3600L) {
+        // hours
+        lastUpdateValue = (lastUpdateDelta / 3600L)
+        lastUpdateUnitText = "Hour(s)"
+    } else if (lastUpdateDelta > 60L) {
+        // minutes
+        lastUpdateValue = (lastUpdateDelta / 60)
+        lastUpdateUnitText = "Minute(s)"
+    } else {
+        lastUpdateValue = lastUpdateDelta
+        lastUpdateUnitText = "Seconds"
+    }
+
+    return "Last Updated: $lastUpdateValue $lastUpdateUnitText ago"
+}
+
 @Composable
 fun DisplayMoonImage() {
     Image(
@@ -230,66 +325,4 @@ fun DisplayMoonCalendar() {
         }
     }   // End moon Calendar
 
-}
-
-@Composable
-fun DisplayUpdateClicketyClick(context: Context) {
-    var text by remember { mutableStateOf("Last updated: Never") }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
-        modifier = Modifier
-            //.border(BorderStroke(5.dp, Color.Green))
-            .fillMaxHeight()
-    ) {
-
-        Text(
-            modifier = Modifier
-                .clickable(enabled = true) {
-                    println("ClickableText1")
-                },
-            text = updateClick(context)
-        )
-
-        ClickableText(
-            text = AnnotatedString("(Click to update)"),
-            onClick = {
-                println("ClickableText2")
-            }
-        )
-
-    }
-}
-
-fun updateClick(context: Context): String {
-    NetworkAPI.startImmediateDataFetch(context)
-
-    var lastUpdateUnitText = "Seconds"
-    var lastUpdateValue = 0
-
-    // Get delta:
-    val lastUpdateDelta = (System.currentTimeMillis() / 1000) - MoonData.LastUpdateTime
-    println("------ delta: $lastUpdateDelta")
-
-    if (lastUpdateDelta > 86400L) {
-        // days
-        lastUpdateValue = (lastUpdateDelta / 86400L).toInt()
-        lastUpdateUnitText = "days"
-    } else if (lastUpdateDelta > 3600L) {
-        // hours
-        lastUpdateValue = (lastUpdateDelta / 3600L).toInt()
-        lastUpdateUnitText = "Hours"
-    } else if (lastUpdateDelta > 60L) {
-        // minutes
-        lastUpdateValue = (lastUpdateDelta / 60).toInt()
-        lastUpdateUnitText = "Minutes"
-    }
-    else {
-        lastUpdateValue = lastUpdateDelta.toInt()
-        lastUpdateUnitText = "Seconds"
-    }
-
-
-    return "Last Updated: $lastUpdateValue $lastUpdateUnitText ago"
 }
