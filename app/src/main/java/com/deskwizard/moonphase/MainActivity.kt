@@ -302,7 +302,7 @@ fun updateClick(viewModel: MoonPhaseViewModel, context: Context): String {
     var lastUpdateValue: Int
 
     if (viewModel.moonInfo.LastUpdateTime == 0L) {
-        println("---------------- Zero!  ------------")
+        //println("---------------- Zero!  ------------")
         return "Last updated: Never"
     }
 

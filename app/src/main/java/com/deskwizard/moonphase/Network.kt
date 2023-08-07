@@ -26,6 +26,7 @@ class DataFetcherWorker(private val context: Context, params: WorkerParameters) 
     @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
     override fun doWork(): Result {
 
+        println("work task run")
         // Perform the background task here
         val moon_data = NetworkAPI.moonDataFetcher(context)
 
@@ -33,6 +34,19 @@ class DataFetcherWorker(private val context: Context, params: WorkerParameters) 
             val data_fetcher_success_data = Data.Builder().putString("json", moon_data).build()
             return Result.success(data_fetcher_success_data)
         }
+
+        return Result.failure()
+    }
+}
+
+class DataFetcherTest(private val context: Context, params: WorkerParameters) :
+    Worker(context, params) {
+
+    @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
+    override fun doWork(): Result {
+
+        // Perform the background task here
+        println(" +++++++++ Periodic ran +++++++++")
 
         return Result.failure()
     }
@@ -86,10 +100,13 @@ object NetworkAPI {
         WorkManager.getInstance(context).enqueue(fetchRequest)
     }
 
+
     // TODO: Always fails, but one time task works with the same worker ??
     fun startDataFetcher(context: Context) {
+        println(" +++++++++ Periodic start +++++++++")
+
         val dataFetcherWorkRequest: PeriodicWorkRequest =
-            PeriodicWorkRequest.Builder(DataFetcherWorker::class.java, 60L, TimeUnit.MINUTES)
+            PeriodicWorkRequest.Builder(DataFetcherWorker::class.java, 15L, TimeUnit.MINUTES)
                 .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
