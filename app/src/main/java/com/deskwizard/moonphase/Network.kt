@@ -19,7 +19,6 @@ import okhttp3.OkHttpClient
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-// TODO: Make the returned value actually do something useful...
 class DataFetcherWorker(private val context: Context, params: WorkerParameters) :
     Worker(context, params) {
 
@@ -27,17 +26,19 @@ class DataFetcherWorker(private val context: Context, params: WorkerParameters) 
     override fun doWork(): Result {
 
         println("work task run")
-        // Perform the background task here
-        val moon_data = NetworkAPI.moonDataFetcher(context)
 
-        if (moon_data != null) {
-            val data_fetcher_success_data = Data.Builder().putString("json", moon_data).build()
-            return Result.success(data_fetcher_success_data)
+        // Perform the background task here
+        val moonData = NetworkAPI.moonDataFetcher(context)
+
+        if (moonData != null) {
+            val dataFetcherSuccessData = Data.Builder().putString("json", moonData).build()
+            return Result.success(dataFetcherSuccessData)
         }
 
         return Result.failure()
     }
 }
+
 
 class DataFetcherTest(private val context: Context, params: WorkerParameters) :
     Worker(context, params) {
@@ -46,11 +47,12 @@ class DataFetcherTest(private val context: Context, params: WorkerParameters) :
     override fun doWork(): Result {
 
         // Perform the background task here
-        println(" +++++++++ Periodic ran +++++++++")
+        println(" =============== Periodic task ran ===============")
 
         return Result.failure()
     }
 }
+
 
 object NetworkAPI {
 
@@ -64,6 +66,61 @@ object NetworkAPI {
         val Phase: String,
         val Illumination: Float
     )
+
+    fun startDataFetcher2(viewModel: MoonPhaseViewModel, context: Context) {
+
+        println(" +++++++++ Periodic start +++++++++")
+
+        val dataFetcherWorkRequest: PeriodicWorkRequest =
+            PeriodicWorkRequest.Builder(DataFetcherTest::class.java, 15L, TimeUnit.MINUTES)
+                .build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "dataFetcherWorker",
+            ExistingPeriodicWorkPolicy.KEEP,
+            dataFetcherWorkRequest
+        )
+    }
+
+    fun startDataFetcher(viewModel: MoonPhaseViewModel, context: Context) {
+        println("Start fetcher")
+
+        val fetchRequest: PeriodicWorkRequest =
+            PeriodicWorkRequest.Builder(DataFetcherWorker::class.java, 15L, TimeUnit.MINUTES)
+                .build()
+
+        // https://developer.android.com/guide/background/persistent/how-to/observe
+        WorkManager.getInstance(context).getWorkInfoByIdLiveData(fetchRequest.id).observe(
+            ProcessLifecycleOwner.get(),
+            Observer {
+                if (it.state == WorkInfo.State.SUCCEEDED) {
+                    val returnedMoonJSON = it.outputData.getString("json")
+                    if (returnedMoonJSON != null) {
+                        val fetchedMoonJSON = format.decodeFromString<MoonJSON>(returnedMoonJSON)
+
+                        val unixTime = System.currentTimeMillis() / 1000
+                        var moonSuccess = MoonData()
+                        moonSuccess.Name = fetchedMoonJSON.Moon
+                        moonSuccess.Phase = fetchedMoonJSON.Phase
+                        moonSuccess.Age = fetchedMoonJSON.Age
+                        moonSuccess.Illumination = fetchedMoonJSON.Illumination
+                        moonSuccess.ImageIndex = fetchedMoonJSON.Index
+                        moonSuccess.LastUpdateTime = unixTime
+
+                        MoonPreferenceProvider(context).saveAll(moonSuccess)
+
+                        viewModel.setMoonData(moonSuccess)
+                    }
+                }
+            }
+        )
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "dataFetcherWorker",
+            ExistingPeriodicWorkPolicy.KEEP,
+            fetchRequest
+        )
+    }
 
     fun startImmediateDataFetch(viewModel: MoonPhaseViewModel, context: Context) {
         println("Immediate fetch requested")
@@ -100,22 +157,6 @@ object NetworkAPI {
         WorkManager.getInstance(context).enqueue(fetchRequest)
     }
 
-
-    // TODO: Always fails, but one time task works with the same worker ??
-    fun startDataFetcher(context: Context) {
-        println(" +++++++++ Periodic start +++++++++")
-
-        val dataFetcherWorkRequest: PeriodicWorkRequest =
-            PeriodicWorkRequest.Builder(DataFetcherWorker::class.java, 15L, TimeUnit.MINUTES)
-                .build()
-
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            "dataFetcherWorker",
-            ExistingPeriodicWorkPolicy.KEEP,
-            dataFetcherWorkRequest
-        )
-    }
-
     fun moonDataFetcher(context: Context) :String? {
         val unixTime = System.currentTimeMillis() / 1000
 
@@ -136,6 +177,8 @@ object NetworkAPI {
         try {
             val responseBody = client.newCall(request).execute().body
             returnedMoonJSON = responseBody?.string().toString()
+            println("--------- Network Reply OK --------")
+
         } catch (e: Exception) {
             println("--------- Network Exception --------")
             e.printStackTrace()
@@ -145,7 +188,6 @@ object NetworkAPI {
         // If we get here, we have valid JSON
         val filteredCharacters = "[]"
         returnedMoonJSON = returnedMoonJSON.filterNot { filteredCharacters.indexOf(it) > -1 }
-        //val fetchedMoonJSON = format.decodeFromString<MoonJSON>(returnedMoonJSON)
 
         return returnedMoonJSON
     }

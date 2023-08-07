@@ -71,7 +71,7 @@ class MoonPhaseViewModel : ViewModel() {
 
 class MainActivity : ComponentActivity() {
 
-    val viewModel: MoonPhaseViewModel by viewModels()
+    private val viewModel: MoonPhaseViewModel by viewModels()
 
     override fun onResume() {
         super.onResume()
@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
 
         /******************************** Data fetcher task ********************************/
 
-        NetworkAPI.startDataFetcher(this)
+        NetworkAPI.startDataFetcher(viewModel, this)
         //NetworkAPI.startImmediateDataFetch(this)
 
 
@@ -106,16 +106,7 @@ class MainActivity : ComponentActivity() {
         viewModel.setMoonData(MoonPreferenceProvider(this).loadAll())
 
         /******************************** The rest ********************************/
-        /*        setContent {
-                    MoonPhaseTheme {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            color = MaterialTheme.colorScheme.background
-                        ) {
-                            DataDisplay(viewModel,this)
-                        }
-                    }
-                }*/
+
     }
 }
 
