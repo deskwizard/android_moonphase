@@ -89,7 +89,7 @@ object NetworkAPI {
     // TODO: Always fails, but one time task works with the same worker ??
     fun startDataFetcher(context: Context) {
         val dataFetcherWorkRequest: PeriodicWorkRequest =
-            PeriodicWorkRequest.Builder(DataFetcherWorker::class.java, 15L, TimeUnit.MINUTES)
+            PeriodicWorkRequest.Builder(DataFetcherWorker::class.java, 60L, TimeUnit.MINUTES)
                 .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(

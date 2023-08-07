@@ -81,8 +81,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NetworkAPI.startImmediateDataFetch(viewModel, this)
-                    DataDisplay(viewModel,this)
+                    //NetworkAPI.startImmediateDataFetch(viewModel, this)
+                    DataDisplay(viewModel, this)
                 }
             }
         }
@@ -97,28 +97,25 @@ class MainActivity : ComponentActivity() {
 
         /******************************** Data fetcher task ********************************/
 
-        //NetworkAPI.startDataFetcher(this)
+        NetworkAPI.startDataFetcher(this)
         //NetworkAPI.startImmediateDataFetch(this)
 
 
         /******************************** Preferences ********************************/
 
-        //val viewModel: MoonPhaseViewModel by viewModels()
-
-        val moon_data_from_prefs = MoonPreferenceProvider(this).loadAll()  // Load saved data
-        viewModel.setMoonData(moon_data_from_prefs)
+        viewModel.setMoonData(MoonPreferenceProvider(this).loadAll())
 
         /******************************** The rest ********************************/
-/*        setContent {
-            MoonPhaseTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    DataDisplay(viewModel,this)
-                }
-            }
-        }*/
+        /*        setContent {
+                    MoonPhaseTheme {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background
+                        ) {
+                            DataDisplay(viewModel,this)
+                        }
+                    }
+                }*/
     }
 }
 
@@ -142,6 +139,7 @@ fun DataDisplay(viewModel: MoonPhaseViewModel, context: Context) {
     }    // End main column
 
 }
+
 @Composable
 fun DisplayMoonImage(viewModel: MoonPhaseViewModel) {
     if (viewModel.moonInfo != null) {
@@ -167,7 +165,10 @@ fun DisplayMoonInfo(viewModel: MoonPhaseViewModel) {
             Text(viewModel.moonInfo.Phase, fontSize = 25.sp)
             Text(viewModel.moonInfo.Name, fontSize = 20.sp)
             Text("${viewModel.moonInfo.Age.roundToInt()} Days Old", color = Color.DarkGray)
-            Text("${(viewModel.moonInfo.Illumination * 100.0).roundToInt()}% Illumination", color = Color.DarkGray)
+            Text(
+                "${(viewModel.moonInfo.Illumination * 100.0).roundToInt()}% Illumination",
+                color = Color.DarkGray
+            )
         }
 
     }
@@ -318,8 +319,7 @@ fun updateClick(viewModel: MoonPhaseViewModel, context: Context): String {
     } else if (lastUpdateDelta > 60L) {
         lastUpdateValue = (lastUpdateDelta / 60).toInt()
         lastUpdateUnitText = "Minute(s)"
-    }
-    else { // Seconds
+    } else { // Seconds
         lastUpdateValue = lastUpdateDelta.toInt()
     }
 
