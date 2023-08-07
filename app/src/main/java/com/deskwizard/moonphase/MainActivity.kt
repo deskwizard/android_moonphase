@@ -46,7 +46,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,6 +70,24 @@ class MoonPhaseViewModel : ViewModel() {
 }
 
 class MainActivity : ComponentActivity() {
+
+    val viewModel: MoonPhaseViewModel by viewModels()
+
+    override fun onResume() {
+        super.onResume()
+        setContent {
+            MoonPhaseTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    NetworkAPI.startImmediateDataFetch(viewModel, this)
+                    DataDisplay(viewModel,this)
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -86,13 +103,13 @@ class MainActivity : ComponentActivity() {
 
         /******************************** Preferences ********************************/
 
-        val viewModel: MoonPhaseViewModel by viewModels()
+        //val viewModel: MoonPhaseViewModel by viewModels()
 
         val moon_data_from_prefs = MoonPreferenceProvider(this).loadAll()  // Load saved data
         viewModel.setMoonData(moon_data_from_prefs)
 
         /******************************** The rest ********************************/
-        setContent {
+/*        setContent {
             MoonPhaseTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -101,7 +118,7 @@ class MainActivity : ComponentActivity() {
                     DataDisplay(viewModel,this)
                 }
             }
-        }
+        }*/
     }
 }
 
@@ -249,8 +266,7 @@ fun DisplayMoonCalendar() {
 }
 
 @Composable
-fun DisplayUpdateClickClick(    viewModel: MoonPhaseViewModel, context: Context) {
-    var text by remember { mutableStateOf("Last updated: Never") }
+fun DisplayUpdateClickClick(viewModel: MoonPhaseViewModel, context: Context) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -264,15 +280,16 @@ fun DisplayUpdateClickClick(    viewModel: MoonPhaseViewModel, context: Context)
             modifier = Modifier
                 .clickable(enabled = true) {
                     println("ClickableText1")
-
                     NetworkAPI.startImmediateDataFetch(viewModel, context)
                 },
             text = updateClick(viewModel, context)
         )
 
         ClickableText(
-            text = AnnotatedString("(Click to update)"),
+            text = AnnotatedString("(Click to update manually)"),
             onClick = {
+                println("ClickableText2")
+                NetworkAPI.startImmediateDataFetch(viewModel, context)
             }
         )
 
@@ -280,8 +297,8 @@ fun DisplayUpdateClickClick(    viewModel: MoonPhaseViewModel, context: Context)
 }
 
 fun updateClick(viewModel: MoonPhaseViewModel, context: Context): String {
-    var lastUpdateUnitText = "Seconds"
-    var lastUpdateValue = 0
+    var lastUpdateUnitText = "Second(s)"
+    var lastUpdateValue: Int
 
     if (viewModel.moonInfo.LastUpdateTime == 0L) {
         println("---------------- Zero!  ------------")
@@ -293,21 +310,17 @@ fun updateClick(viewModel: MoonPhaseViewModel, context: Context): String {
     println("------ delta: $lastUpdateDelta")
 
     if (lastUpdateDelta > 86400L) {
-        // days
         lastUpdateValue = (lastUpdateDelta / 86400L).toInt()
-        lastUpdateUnitText = "days"
+        lastUpdateUnitText = "Day(s)"
     } else if (lastUpdateDelta > 3600L) {
-        // hours
         lastUpdateValue = (lastUpdateDelta / 3600L).toInt()
-        lastUpdateUnitText = "Hours"
+        lastUpdateUnitText = "Hour(s)"
     } else if (lastUpdateDelta > 60L) {
-        // minutes
         lastUpdateValue = (lastUpdateDelta / 60).toInt()
-        lastUpdateUnitText = "Minutes"
+        lastUpdateUnitText = "Minute(s)"
     }
-    else {
+    else { // Seconds
         lastUpdateValue = lastUpdateDelta.toInt()
-        lastUpdateUnitText = "Seconds"
     }
 
     return "Last Updated: $lastUpdateValue $lastUpdateUnitText ago"
