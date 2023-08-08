@@ -94,8 +94,10 @@ object NetworkAPI {
             ProcessLifecycleOwner.get(),
             Observer {
                 if (it.state == WorkInfo.State.SUCCEEDED) {
+                    println("work success")
                     val returnedMoonJSON = it.outputData.getString("json")
                     if (returnedMoonJSON != null) {
+                        println("not null")
                         val fetchedMoonJSON = format.decodeFromString<MoonJSON>(returnedMoonJSON)
 
                         val unixTime = System.currentTimeMillis() / 1000
@@ -111,6 +113,12 @@ object NetworkAPI {
 
                         viewModel.setMoonData(moonSuccess)
                     }
+                    else {
+                        println("null???")
+                    }
+                }
+                else {
+                    println("\n not success ${it.state}")
                 }
             }
         )
@@ -149,6 +157,7 @@ object NetworkAPI {
 
                         viewModel.setMoonData(moonSuccess)
                     }
+
                 }
             }
         )
