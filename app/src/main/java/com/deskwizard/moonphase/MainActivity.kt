@@ -81,6 +81,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    viewModel.setMoonData(MoonPreferenceProvider(this).loadAll())
+
                     //NetworkAPI.startImmediateDataFetch(viewModel, this)
                     DataDisplay(viewModel, this)
                 }
@@ -103,7 +105,7 @@ class MainActivity : ComponentActivity() {
 
         /******************************** Preferences ********************************/
 
-        viewModel.setMoonData(MoonPreferenceProvider(this).loadAll())
+        //viewModel.setMoonData(MoonPreferenceProvider(this).loadAll())
 
         /******************************** The rest ********************************/
 
@@ -133,7 +135,7 @@ fun DataDisplay(viewModel: MoonPhaseViewModel, context: Context) {
 
 @Composable
 fun DisplayMoonImage(viewModel: MoonPhaseViewModel) {
-    if (viewModel.moonInfo != null) {
+    //if (viewModel.moonInfo != null) {
         Image(
             painter = painterResource(id = moonPhaseImages[viewModel.moonInfo.ImageIndex]),
             contentDescription = "Moon Phase Image",
@@ -143,7 +145,7 @@ fun DisplayMoonImage(viewModel: MoonPhaseViewModel) {
                 .padding(25.dp),
             contentScale = ContentScale.FillBounds
         )
-    }
+    //}
 }
 
 @Composable
@@ -274,7 +276,7 @@ fun DisplayUpdateClickClick(viewModel: MoonPhaseViewModel, context: Context) {
                     println("ClickableText1")
                     NetworkAPI.startImmediateDataFetch(viewModel, context)
                 },
-            text = updateClick(viewModel, context)
+            text = updateClick(viewModel)
         )
 
         ClickableText(
@@ -288,9 +290,9 @@ fun DisplayUpdateClickClick(viewModel: MoonPhaseViewModel, context: Context) {
     }
 }
 
-fun updateClick(viewModel: MoonPhaseViewModel, context: Context): String {
+fun updateClick(viewModel: MoonPhaseViewModel): String {
     var lastUpdateUnitText = "Second(s)"
-    var lastUpdateValue: Int
+    val lastUpdateValue: Int
 
     if (viewModel.moonInfo.LastUpdateTime == 0L) {
         //println("---------------- Zero!  ------------")

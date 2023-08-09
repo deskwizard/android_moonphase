@@ -17,7 +17,7 @@ class MoonPreferenceProvider(context: Context) {
         with(sharedPref.edit()) {
             putString(key, value)
             commit()
-            println("---------- Saving key $key: $value ----------")
+            //println("---------- Saving key $key: $value ----------")
         }
     }
 
@@ -25,7 +25,7 @@ class MoonPreferenceProvider(context: Context) {
         with(sharedPref.edit()) {
             putFloat(key, value)
             commit()
-            println("---------- Saving key $key: $value ----------")
+            //println("---------- Saving key $key: $value ----------")
         }
     }
 
@@ -33,7 +33,7 @@ class MoonPreferenceProvider(context: Context) {
         with(sharedPref.edit()) {
             putInt(key, value)
             commit()
-            println("---------- Saving key $key: $value ----------")
+            //println("---------- Saving key $key: $value ----------")
         }
     }
 
@@ -41,7 +41,7 @@ class MoonPreferenceProvider(context: Context) {
         with(sharedPref.edit()) {
             putLong(key, value)
             commit()
-            println("---------- Saving key $key: $value ----------")
+            //println("---------- Saving key $key: $value ----------")
         }
     }
 
@@ -57,25 +57,25 @@ class MoonPreferenceProvider(context: Context) {
 
     private fun loadString(key: String): String? {
         val value = sharedPref.getString(key, "No Data")
-        println("++++++++++ Loading key $key: $value +++++++++++")
+        //println("++++++++++ Loading key $key: $value +++++++++++")
         return value
     }
 
     private fun loadFloat(key: String): Float {
         val value = sharedPref.getFloat(key, 0.0F)
-        println("++++++++++ Loading key $key: $value +++++++++++")
+        //println("++++++++++ Loading key $key: $value +++++++++++")
         return value
     }
 
     private fun loadInt(key: String): Int {
         val value = sharedPref.getInt(key, 0)
-        println("++++++++++ Loading key $key: $value +++++++++++")
+        //println("++++++++++ Loading key $key: $value +++++++++++")
         return value
     }
 
     private fun loadLong(key: String): Long {
         val value = sharedPref.getLong(key, 0)
-        println("++++++++++ Loading key $key: $value +++++++++++")
+        //println("++++++++++ Loading key $key: $value +++++++++++")
         return value
     }
 
