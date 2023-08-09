@@ -61,7 +61,7 @@ import kotlin.math.roundToInt
 
 
 class MoonPhaseViewModel : ViewModel() {
-    var moonInfo by mutableStateOf<MoonData>(MoonData())
+    var moonInfo by mutableStateOf(MoonData())
         private set
 
     fun setMoonData(newMoonData: MoonData) {
@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
 
         /******************************** Data fetcher task ********************************/
 
-        NetworkAPI.startDataFetcher(viewModel, this)
+        NetworkAPI.startDataFetcher(this)
         //NetworkAPI.startImmediateDataFetch(this)
 
 

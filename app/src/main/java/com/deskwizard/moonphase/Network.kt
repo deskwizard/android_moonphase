@@ -19,7 +19,7 @@ import okhttp3.OkHttpClient
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-var testing: Boolean = true
+var testing: Boolean = false
 
 class PeriodicDataFetcherWorker(private val context: Context, params: WorkerParameters) :
     Worker(context, params) {
@@ -27,15 +27,15 @@ class PeriodicDataFetcherWorker(private val context: Context, params: WorkerPara
     @SuppressLint("MissingPermission")   // TODO: fix the code so it works without
     override fun doWork(): Result {
 
-
         println("---------- Periodic Fetch worker run $testing -----------")
 
         // Perform the background task here
-        val moonData = NetworkAPI.moonDataFetcher(context)
+        val moonData = NetworkAPI.moonDataFetcher()
 
         if (moonData != null) {
             println("-------------- Worker success, data: $moonData")
 
+/*
             val fetchedMoonJSON = NetworkAPI.format.decodeFromString<NetworkAPI.MoonJSON>(moonData)
 
             MoonData().Name = fetchedMoonJSON.Moon
@@ -46,12 +46,14 @@ class PeriodicDataFetcherWorker(private val context: Context, params: WorkerPara
             MoonData().LastUpdateTime = System.currentTimeMillis() / 1000
 
             MoonPreferenceProvider(context).saveAll(MoonData())
+*/
 
-            //MoonPhaseViewModel.setMoonData(MoonData())
-
+            //viewModel.setMoonData(MoonData())
+            testing = true
             return Result.success()
         }
 
+        testing = false
         return Result.failure()
     }
 }
@@ -65,7 +67,7 @@ class ImmediateDataFetcherWorker(private val context: Context, params: WorkerPar
         println("---------- Fetch worker run -----------------")
 
         // Perform the background task here
-        val moonData = NetworkAPI.moonDataFetcher(context)
+        val moonData = NetworkAPI.moonDataFetcher()
 
         if (moonData != null) {
             val dataFetcherSuccessData = Data.Builder().putString("json", moonData).build()
@@ -91,7 +93,7 @@ object NetworkAPI {
     )
 
 
-    fun startDataFetcher(viewModel: MoonPhaseViewModel, context: Context) {
+    fun startDataFetcher(context: Context) {
 
         println(" +++++++++ Periodic start +++++++++")
 
@@ -144,7 +146,7 @@ object NetworkAPI {
         WorkManager.getInstance(context).enqueue(fetchRequest)
     }
 
-    fun moonDataFetcher(context: Context): String? {
+    fun moonDataFetcher(): String? {
         val unixTime = System.currentTimeMillis() / 1000
 
         var returnedMoonJSON: String
@@ -172,10 +174,15 @@ object NetworkAPI {
             return null
         }
 
-        // If we get here, we have valid JSON
+        // -------------- If we get here, we have valid JSON --------------
         val filteredCharacters = "[]"
         returnedMoonJSON = returnedMoonJSON.filterNot { filteredCharacters.indexOf(it) > -1 }
         println("Return from moonDataFetcher: $returnedMoonJSON")
+
+
+
+
+
         return returnedMoonJSON
     }
 }
